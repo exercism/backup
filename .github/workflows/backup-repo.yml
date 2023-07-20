@@ -1,7 +1,8 @@
 name: Backup
 
 on:
-  workflow_call:
+  repository_dispatch:
+    types: [backup_repo]
 
 permissions:
   contents: read
@@ -12,19 +13,24 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
-        with:
-          fetch-depth: 0 # Fetch the entire history to backup everyting
+      - env:
+          MESSAGE: ${{ github.event.client_payload.message }}
+        run: echo $MESSAGE
 
-      - name: Setup SSH for AWS CodeCommit
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com >> ~/.ssh/known_hosts
+    # steps:
+    #   - name: Checkout code
+    #     uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+    #     with:
+    #       fetch-depth: 0 # Fetch the entire history to backup everyting
 
-      - name: Push repo to AWS CodeCommit
-        run: |
-          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ github.event.repository.name }}"
-          git push --tags --prune aws-codecommit "refs/remotes/origin/*:refs/heads/*"
+    #   - name: Setup SSH for AWS CodeCommit
+    #     run: |
+    #       mkdir -p ~/.ssh
+    #       echo "${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+    #       chmod 600 ~/.ssh/id_rsa
+    #       ssh-keyscan -t rsa git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com >> ~/.ssh/known_hosts
+
+    #   - name: Push repo to AWS CodeCommit
+    #     run: |
+    #       git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ github.event.repository.name }}"
+    #       git push --tags --prune aws-codecommit "refs/remotes/origin/*:refs/heads/*"
