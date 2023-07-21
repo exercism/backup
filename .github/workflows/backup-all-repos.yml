@@ -29,35 +29,34 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      # - name: Fetch the tooling repos
-      #   id: fetch-tooling-repos
-      #   run: |
-      #     tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
+      - name: Fetch the tooling repos
+        id: fetch-tooling-repos
+        run: |
+          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      #     echo 'TOOLING_REPOS<<TOOLING_REPOS_EOF' >> $GITHUB_ENV
-      #     echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
-      #     echo 'TOOLING_REPOS_EOF' >> $GITHUB_ENV
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-
-      # - name: Fetch the other repos
-      #   id: fetch-other-repos
-      #   run: |
-      #     other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
-
-      #     echo 'OTHER_REPOS<<OTHER_REPOS_EOF' >> $GITHUB_ENV
-      #     echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
-      #     echo 'OTHER_REPOS_EOF' >> $GITHUB_ENV
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
+      - name: Fetch the other repos
+        id: fetch-other-repos
+        run: |
+          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   test:
     needs: [fetch-repos]
     runs-on: ubuntu-22.04
     steps:
-      - run: echo $TRACK_REPOS
+      - run: |
+          echo $TRACK_REPOS
+          echo $TOOLING_REPOS
+          echo $OTHER_REPOS
         env:
           TRACK_REPOS: ${{ needs.fetch-repos.outputs.track-repos }}
+          TOOLING_REPOS: ${{ needs.fetch-repos.outputs.tooling-repos }}
+          OTHER_REPOS: ${{ needs.fetch-repos.outputs.other-repos }}
 
   # backup-track-repos:
   #   needs: [fetch-repos]
