@@ -24,21 +24,11 @@ jobs:
         uses: actions/github-script@d556feaca394842dc55e4734bf3bb9f685482fa0
         with:
           script: |
-            const allRepos = (await github.paginate(github.rest.search.repos, {
-              q: 'org:exercism+is:public+archived:false'
-            })).flatMap(({ full_name }) => [full_name])
-
-            const toolingRepos = (await github.paginate(github.rest.search.repos, {
-              q: 'org:exercism+topic:exercism-tooling+is:public+archived:false'
-            })).flatMap(({ full_name }) => [full_name])
-
             const trackRepos = (await github.paginate(github.rest.search.repos, {
               q: 'org:exercism+topic:exercism-track+is:public+archived:false'
             })).flatMap(({ full_name }) => [full_name])
 
-            const restRepos = allRepos.filter(r => !toolingRepos.includes(r) && !trackRepos.includes(r))
-
-            return { trackRepos, toolingRepos, restRepos }
+            return { track: trackRepos }
 
   backup-repos:
     needs: [fetch-repos]
@@ -53,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.repos.track) }}
+        repo: ${{ fromJson(needs.fetch-repos.outputs.track ) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
