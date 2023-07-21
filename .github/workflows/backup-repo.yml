@@ -78,6 +78,7 @@ jobs:
           git remote prune aws-codecommit
           git fetch aws-codecommit
           git push aws-codecommit main
+          git branch
           git checkout $(git log --branches -1 --pretty=format:"%H")
           git branch -D main
           git branch
