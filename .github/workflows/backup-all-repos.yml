@@ -16,41 +16,41 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      track-repos: ${{ steps.fetch-track-repos.outputs.repos }}
-      tooling-repos: ${{ steps.fetch-tooling-repos.outputs.repos }}
-      other-repos: ${{ steps.fetch-other-repos.outputs.repos }}
+      track-repos: ${{ steps.fetch-track-repos.outputs.track-repos }}
+      tooling-repos: ${{ steps.fetch-tooling-repos.outputs.tooling-repos }}
+      other-repos: ${{ steps.fetch-other-repos.outputs.other-repos }}
 
     steps:
       - name: Fetch the track repos
         id: fetch-track-repos
         run: |
-          repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]')
+          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]')
 
-          echo 'REPOS<<EOF' >> $GITHUB_ENV
-          echo "repos=${repos}" >> "$GITHUB_OUTPUT"
-          echo 'EOF' >> $GITHUB_ENV
+          echo 'TRACK_REPOS<<EOF' >> $GITHUB_ENV
+          echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
+          echo 'TRACK_EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: Fetch the tooling repos
         id: fetch-tooling-repos
         run: |
-          repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
+          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'REPOS<<EOF' >> $GITHUB_ENV
-          echo "repos=${repos}" >> "$GITHUB_OUTPUT"
-          echo 'EOF' >> $GITHUB_ENV
+          echo 'TOOLING_REPOS<<EOF' >> $GITHUB_ENV
+          echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
+          echo 'TOOLING_REPOS' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: Fetch the other repos
         id: fetch-other-repos
         run: |
-          repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
+          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'REPOS<<EOF' >> $GITHUB_ENV
-          echo "repos=${repos}" >> "$GITHUB_OUTPUT"
-          echo 'EOF' >> $GITHUB_ENV
+          echo 'OTHER_REPOS<<EOF' >> $GITHUB_ENV
+          echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
+          echo 'OTHER_REPOS' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
