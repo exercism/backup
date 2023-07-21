@@ -43,47 +43,74 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-  backup-track-repos:
+  create-codecommit-repos:
     needs: [fetch-repos]
-    name: Backup
+    name: Create codecommit repos
+    runs-on: ubuntu-22.04
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEPLOY_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_DEPLOY_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+      - name: Create repos
+        run: |
+          github_repos="${TRACK_REPOS} ${TOOLING_REPOS} ${OTHER_REPOS}"
+          codecommit_repos=$(aws codecommit list-repositories | jq -r '.repositories[] | .repositoryName')
+          missing_codecommit_repos=$(comm -23 <(echo "${github_repos}" | sort) <(echo "${codecommit_repos}" | sort))
 
-  backup-tooling-repos:
-    needs: [fetch-repos]
-    name: Backup
+          for repo in $missing_codecommit_repos; do  
+            aws codecommit create-repository --repository-name $repo
+          done
+        env:
+          TRACK_REPOS: ${{ needs.fetch-repos.outputs.track-repos }}
+          TOOLING_REPOS: ${{ needs.fetch-repos.outputs.tooling-repos }}
+          OTHER_REPOS: ${{ needs.fetch-repos.outputs.other-repos }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+  # backup-track-repos:
+  #   needs: [create-codecommit-repos]
+  #   name: Backup
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
 
-  backup-other-repos:
-    needs: [fetch-repos]
-    name: Backup
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+  # backup-tooling-repos:
+  #   needs: [create-codecommit-repos]
+  #   name: Backup
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
+
+  # backup-other-repos:
+  #   needs: [create-codecommit-repos]
+  #   name: Backup
+
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
