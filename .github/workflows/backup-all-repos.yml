@@ -24,9 +24,11 @@ jobs:
       - name: Fetch the track repos
         id: fetch-track-repos
         run: |
-          echo 'track-repos<<EOF' >> "${GITHUB_ENV}"
+          echo 'TRACK_REPOS<<EOF' >> "${GITHUB_ENV}"
           gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' >> "${GITHUB_ENV}"
           echo 'EOF' >> "${GITHUB_ENV}"
+
+          echo "track-repos=${TRACK_REPOS}" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
