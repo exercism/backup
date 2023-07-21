@@ -61,7 +61,7 @@ jobs:
 
       - name: Create repos
         run: |
-          github_repos="${TRACK_REPOS} ${TOOLING_REPOS} ${OTHER_REPOS}"
+          github_repos="${TRACK_REPOS} ${TOOLING_REPOS} ${OTHER_REPOS} | sort"
           codecommit_repos=$(aws codecommit list-repositories | jq -r '.repositories[] | .repositoryName')
           missing_codecommit_repos=$(comm -23 <(echo "${github_repos}" | sort) <(echo "${codecommit_repos}" | sort))
 
