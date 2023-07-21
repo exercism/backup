@@ -31,6 +31,14 @@ jobs:
           echo 'TRACK_REPOS<<EOF' >> $GITHUB_ENV
           echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
           echo 'EOF' >> $GITHUB_ENV
+
+          echo 'TOOLING_REPOS<<EOF' >> $GITHUB_ENV
+          echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> $GITHUB_ENV
+
+          echo 'OTHER_REPOS<<EOF' >> $GITHUB_ENV
+          echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -40,6 +48,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
 
@@ -48,30 +57,32 @@ jobs:
     with:
       repo: ${{ matrix.repo }}
 
-  # backup-tooling-repos:
-  #   needs: [fetch-repos]
-  #   name: Backup ${{ matrix.repo }}
+  backup-tooling-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
 
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
 
-  #   uses: exercism/backup/.github/workflows/backup.yml@main
-  #   secrets: inherit
-  #   with:
-  #     repo: ${{ matrix.repo }}
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
 
-  # backup-other-repos:
-  #   needs: [fetch-repos]
-  #   name: Backup ${{ matrix.repo }}
+  backup-other-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
 
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
 
-  #   uses: exercism/backup/.github/workflows/backup.yml@main
-  #   secrets: inherit
-  #   with:
-  #     repo: ${{ matrix.repo }}
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
