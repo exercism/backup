@@ -52,20 +52,28 @@ jobs:
       #   env:
       #     GH_TOKEN: ${{ github.token }}
 
-  backup-track-repos:
+  test:
     needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo $TRACK_REPOS
+        env:
+          TRACK_REPOS: ${{ needs.fetch-repos.outputs.track-repos }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+  # backup-track-repos:
+  #   needs: [fetch-repos]
+  #   name: Backup ${{ matrix.repo }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
 
   # backup-tooling-repos:
   #   needs: [fetch-repos]
