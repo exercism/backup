@@ -12,42 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  fetch-repos:
-    name: Fetch repos
-    runs-on: ubuntu-22.04
-
-    outputs:
-      track-repos: ${{ steps.fetch-track-repos.outputs.track-repos }}
-      tooling-repos: ${{ steps.fetch-tooling-repos.outputs.tooling-repos }}
-      other-repos: ${{ steps.fetch-other-repos.outputs.other-repos }}
-
-    steps:
-      - name: Fetch the track repos
-        id: fetch-track-repos
-        run: |
-          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' | tr -d '\n')
-          echo "track-repos=${track_repos}" >> "${GITHUB_OUTPUT}"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Fetch the tooling repos
-        id: fetch-tooling-repos
-        run: |
-          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
-          echo "tooling-repos=${tooling_repos}" >> "${GITHUB_OUTPUT}"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Fetch the other repos
-        id: fetch-other-repos
-        run: |
-          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
-          echo "other-repos=${other_repos}" >> "${GITHUB_OUTPUT}"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
   create-codecommit-repos:
-    needs: [fetch-repos]
     name: Create codecommit repos
     runs-on: ubuntu-22.04
 
@@ -61,27 +26,59 @@ jobs:
 
       - name: Create repos
         run: |
-          github_repos="${TRACK_REPOS} ${TOOLING_REPOS} ${OTHER_REPOS} | sort"
+          github_repos=$(gh api -X GET search/repositories --paginate -f q='org:exercism is:public archived:false' --jq '.items[].name')
           codecommit_repos=$(aws codecommit list-repositories | jq -r '.repositories[] | .repositoryName')
           missing_codecommit_repos=$(comm -23 <(echo "${github_repos}" | sort) <(echo "${codecommit_repos}" | sort))
 
           for repo in $missing_codecommit_repos; do
             echo aws codecommit create-repository --repository-name $repo
           done
+
+  fetch-github-repos:
+    name: Fetch GitHub repos
+    runs-on: ubuntu-22.04
+
+    outputs:
+      track-repos: ${{ steps.fetch-track-repos.outputs.track-repos }}
+      tooling-repos: ${{ steps.fetch-tooling-repos.outputs.tooling-repos }}
+      other-repos: ${{ steps.fetch-other-repos.outputs.other-repos }}
+
+    steps:
+      - name: Fetch track repos
+        id: fetch-track-repos
+        run: |
+          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' | tr -d '\n')
+          echo "track-repos=${track_repos}" >> "${GITHUB_OUTPUT}"
         env:
-          TRACK_REPOS: ${{ needs.fetch-repos.outputs.track-repos }}
-          TOOLING_REPOS: ${{ needs.fetch-repos.outputs.tooling-repos }}
-          OTHER_REPOS: ${{ needs.fetch-repos.outputs.other-repos }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Fetch tooling repos
+        id: fetch-tooling-repos
+        run: |
+          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          echo "tooling-repos=${tooling_repos}" >> "${GITHUB_OUTPUT}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Fetch other repos
+        id: fetch-other-repos
+        run: |
+          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          echo "other-repos=${other_repos}" >> "${GITHUB_OUTPUT}"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   backup-track-repos:
-    needs: [create-codecommit-repos]
     name: Backup
+    needs:
+      - create-codecommit-repos
+      - fetch-github-repos
 
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+        repo: ${{ fromJson(needs.fetch-github-repos.outputs.track-repos) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
@@ -89,14 +86,16 @@ jobs:
       repo: ${{ matrix.repo }}
 
   backup-tooling-repos:
-    needs: [create-codecommit-repos]
     name: Backup
+    needs:
+      - create-codecommit-repos
+      - fetch-github-repos
 
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+        repo: ${{ fromJson(needs.fetch-github-repos.outputs.tooling-repos) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
@@ -104,14 +103,16 @@ jobs:
       repo: ${{ matrix.repo }}
 
   backup-other-repos:
-    needs: [create-codecommit-repos]
     name: Backup
+    needs:
+      - create-codecommit-repos
+      - fetch-github-repos
 
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+        repo: ${{ fromJson(needs.fetch-github-repos.outputs.other-repos) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
