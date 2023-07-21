@@ -26,9 +26,9 @@ jobs:
         run: |
           track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]')
 
-          echo 'TRACK_REPOS<<EOF' >> $GITHUB_ENV
+          echo 'TRACK_REPOS<<TRACK_REPOS_EOF' >> $GITHUB_ENV
           echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
-          echo 'TRACK_EOF' >> $GITHUB_ENV
+          echo 'TRACK_REPOS_EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -37,9 +37,9 @@ jobs:
         run: |
           tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'TOOLING_REPOS<<EOF' >> $GITHUB_ENV
+          echo 'TOOLING_REPOS<<TOOLING_REPOS_EOF' >> $GITHUB_ENV
           echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
-          echo 'TOOLING_REPOS' >> $GITHUB_ENV
+          echo 'TOOLING_REPOS_EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -48,9 +48,9 @@ jobs:
         run: |
           other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'OTHER_REPOS<<EOF' >> $GITHUB_ENV
+          echo 'OTHER_REPOS<<OTHER_REPOS_EOF' >> $GITHUB_ENV
           echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
-          echo 'OTHER_REPOS' >> $GITHUB_ENV
+          echo 'OTHER_REPOS_EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
