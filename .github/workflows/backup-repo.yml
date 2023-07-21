@@ -9,6 +9,9 @@ on:
         description: List of repos to backup, formatted as a JSON array, e.g. ["configlet"]
         required: true
         default: ""
+  push:
+    branches:
+      - main
   schedule:
     - cron: 0 0 * * * # Daily
 
