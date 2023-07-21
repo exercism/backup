@@ -65,23 +65,28 @@ jobs:
           repository: ${{ github.repository_owner }}/${{ matrix.repo }}
           fetch-depth: 0 # Fetch the entire history to backup everyting
 
-      - name: Setup SSH for AWS CodeCommit
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com >> ~/.ssh/known_hosts
-
-      - name: Push repo to AWS CodeCommit
+      - name: Test
         run: |
           git branch -v
-          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ matrix.repo }}"
-          git remote prune aws-codecommit
-          git fetch aws-codecommit
-          git push aws-codecommit main
-          git branch
-          git checkout $(git log --branches -1 --pretty=format:"%H")
-          git branch -D main
-          git branch
-          git push --all --force aws-codecommit
-          git push --tags --force aws-codecommit
+          git remote -vv
+
+      # - name: Setup SSH for AWS CodeCommit
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan -t rsa git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com >> ~/.ssh/known_hosts
+
+      # - name: Push repo to AWS CodeCommit
+      #   run: |
+      #     git branch -v
+      #     git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ matrix.repo }}"
+      #     git remote prune aws-codecommit
+      #     git fetch aws-codecommit
+      #     git push aws-codecommit main
+      #     git branch
+      #     git checkout $(git log --branches -1 --pretty=format:"%H")
+      #     git branch -D main
+      #     git branch
+      #     git push --all --force aws-codecommit
+      #     git push --tags --force aws-codecommit
