@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       repos:
-        description: List of repos to backup, formatted as a JSON array, e.g. ["exercism/configlet"]
+        description: List of repos to backup, formatted as a JSON array, e.g. ["configlet"]
         required: true
         default: ""
   schedule:
@@ -38,7 +38,7 @@ jobs:
                 q: 'org:exercism+is:public+archived:false'
               })
 
-              return trackRepos.flatMap(({ full_name }) => [full_name])
+              return trackRepos.flatMap(({ name }) => [name])
             }
 
   backup-repos:
