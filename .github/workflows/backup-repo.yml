@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  backup_repo:
+  backup-repo:
     name: Backup repo
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
