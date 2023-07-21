@@ -35,10 +35,11 @@ jobs:
               return JSON.parse(context.payload.inputs.repos)
             } else {
               const trackRepos = await github.paginate(github.rest.search.repos, {
-                q: 'org:exercism+topic:exercism-tooling+is:public+archived:false'
+                q: 'org:exercism+is:public+archived:false'
               })
 
               return trackRepos.flatMap(({ full_name }) => [full_name])
+            }
 
   backup-repos:
     needs: [fetch-repos]
