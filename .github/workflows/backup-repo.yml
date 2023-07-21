@@ -76,6 +76,7 @@ jobs:
         run: |
           git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ matrix.repo }}"
           git remote prune aws-codecommit
-          git push aws-codecommit main 
+          git push aws-codecommit main
+          git checkout $(git log --branches -1 --pretty=format:"%H")
           git branch -D main
           git push --tags --all --force aws-codecommit
