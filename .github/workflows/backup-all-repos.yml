@@ -16,39 +16,62 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      track-repos: ${{ steps.track-repos.outputs.repos }}
+      track-repos: ${{ steps.fetch-repos.outputs.track-repos }}
+      tooling-repos: ${{ steps.fetch-repos.outputs.tooling-repos }}
+      other-repos: ${{ steps.fetch-repos.outputs.other-repos }}
 
     steps:
-      - name: Fetch the track repos
-        id: track-repos
+      - name: Fetch the repos
+        id: fetch-repos
         run: |
-          repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
-          echo "repos=${repos}" >> "$GITHUB_OUTPUT"
+          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]')
+          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
+          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
+
+          echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
+          echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
+          echo "other_repos-repos=${other_repos}" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
-  backup-repos:
+  backup-track-repos:
     needs: [fetch-repos]
-    # name: Backup ${{ matrix.repo }}
+    name: Backup ${{ matrix.repo }}
 
-    # Launch one job per track repo.
-    # This is probably less efficient than running everything in one job
-    # and manually cloning and checking out the repos. However, launching a job
-    # lets us use actions like actions/checkout.
-    # It also gives us a pretty job overview that makes it easy to spot issues with
-    # particular tracks.
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos ) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
 
-    # uses: exercism/backup/.github/workflows/backup.yml@main
-    # secrets: inherit
-    # with:
-    #   repo: ${{ matrix.repo }}
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
 
-    runs-on: ubuntu-22.04
-    steps:
-      - env:
-          OUTPUT: ${{ needs.fetch-repos.outputs.track-repos }}
-        run: echo $OUTPUT
+  backup-tooling-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
+
+  backup-other-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
