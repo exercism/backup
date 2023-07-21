@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      track-repos: ${{ steps.fetch-repos.outputs.result.track }}
+      track-repos: ${{ steps.fetch-repos.outputs.result.trackRepos }}
 
     steps:
       - name: Fetch the repos to backup
@@ -28,7 +28,7 @@ jobs:
               q: 'org:exercism+topic:exercism-track+is:public+archived:false'
             })).flatMap(({ full_name }) => [full_name])
 
-            return { track: trackRepos }
+            return { trackRepos }
 
   backup-repos:
     needs: [fetch-repos]
