@@ -30,7 +30,7 @@ jobs:
 
           echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
           echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
-          echo "other_repos-repos=${other_repos}" >> "$GITHUB_OUTPUT"
+          echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
