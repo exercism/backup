@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   create-codecommit-repos:
-    name: Create codecommit repos
+    name: Create CodeCommit repos
     runs-on: ubuntu-22.04
 
     steps:
