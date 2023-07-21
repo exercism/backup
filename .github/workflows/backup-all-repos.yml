@@ -16,19 +16,14 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      track-repos: ${{ steps.fetch-repos.outputs.result.trackRepos }}
+      track-repos: ${{ steps.track-repos.outputs.repos }}
 
     steps:
-      - name: Fetch the repos to backup
-        id: fetch-repos
-        uses: actions/github-script@d556feaca394842dc55e4734bf3bb9f685482fa0
-        with:
-          script: |
-            const trackRepos = (await github.paginate(github.rest.search.repos, {
-              q: 'org:exercism+topic:exercism-track+is:public+archived:false'
-            })).flatMap(({ full_name }) => [full_name])
-
-            return { trackRepos }
+      - name: Fetch the track repos
+        id: track-repos
+        run: |
+          repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
+          echo "repos=${repos}" >> "$GITHUB_OUTPUT"
 
   backup-repos:
     needs: [fetch-repos]
