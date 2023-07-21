@@ -3,6 +3,7 @@ name: Backup
 on:
   repository_dispatch:
     types: [backup_repo]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,10 +13,48 @@ jobs:
     name: AWS CodeCommit
     runs-on: ubuntu-22.04
 
+    # steps:
+    #   - env:
+    #       MESSAGE: ${{ github.event.client_payload.message }}
+    #     run: echo $MESSAGE
+
+    outputs:
+      repos: ${{ steps.determine-repos.outputs.result }}
+
     steps:
-      - env:
-          MESSAGE: ${{ github.event.client_payload.message }}
-        run: echo $MESSAGE
+      - name: Determine repos to backup
+        id: determine-repos
+        uses: actions/github-script@d556feaca394842dc55e4734bf3bb9f685482fa0
+        with:
+          script: |
+            if (context.eventName === 'repository_dispatch') {
+              return context.payload.client_payload.repos
+            } else if (context.eventName === 'workflow_dispatch') {
+              return JSON.parse(context.payload.inputs.repos)
+            } else {
+              const trackRepos = await github.paginate(github.rest.search.repos, {
+                q: 'org:exercism+topic:exercism-tooling+is:public+archived:false'
+              })
+
+              return trackRepos.flatMap(({ full_name }) => [full_name])
+
+              push-to-repos:
+                needs: [fetch-repos, abort-timer, open-tracking-issue]
+                name: Push to ${{ matrix.repo }}
+                runs-on: ubuntu-20.04
+                timeout-minutes: 30
+
+                # Launch one job per track.
+                # This is probably less efficient than running everything in one job
+                # and manually cloning and checking out the repos. However, launching a job
+                # lets us use actions like actions/checkout.
+                # It also gives us a pretty job overview that makes it easy to spot issues with
+                # particular tracks.
+                strategy:
+                  fail-fast: false
+                  max-parallel: 1
+                  matrix:
+                    repo: ${{ fromJson(needs.fetch-repos.outputs.repos) }}
 
     # steps:
     #   - name: Checkout code
