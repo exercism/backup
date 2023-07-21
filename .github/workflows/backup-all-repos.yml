@@ -32,7 +32,7 @@ jobs:
 
   backup-repos:
     needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+    # name: Backup ${{ matrix.repo }}
 
     # Launch one job per track repo.
     # This is probably less efficient than running everything in one job
@@ -40,12 +40,18 @@ jobs:
     # lets us use actions like actions/checkout.
     # It also gives us a pretty job overview that makes it easy to spot issues with
     # particular tracks.
-    strategy:
-      fail-fast: false
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos ) }}
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos ) }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+    # uses: exercism/backup/.github/workflows/backup.yml@main
+    # secrets: inherit
+    # with:
+    #   repo: ${{ matrix.repo }}
+
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Test
+        run: |
+          echo ${{ needs.fetch-repos.outputs }}
