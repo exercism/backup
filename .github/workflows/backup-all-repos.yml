@@ -56,5 +56,6 @@ jobs:
         repo: ${{ fromJson(needs.fetch-repos.outputs.repos.track) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
     with:
       repo: ${{ matrix.repo }}

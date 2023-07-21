@@ -1,5 +1,4 @@
 name: Backup repo
-
 on:
   repository_dispatch:
     types: [backup_repo]
@@ -9,7 +8,7 @@ permissions:
 
 jobs:
   backup_repo:
-    name: Repo
     uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
     with:
       repo: ${{ github.event.client_payload.repo }}
