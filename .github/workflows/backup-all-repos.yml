@@ -24,6 +24,8 @@ jobs:
         run: |
           repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
           echo "repos=${repos}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   backup-repos:
     needs: [fetch-repos]
