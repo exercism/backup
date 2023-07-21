@@ -24,9 +24,9 @@ jobs:
       - name: Fetch the track repos
         id: fetch-track-repos
         run: |
-          echo 'track-repos<<EOF' >> $GITHUB_ENV
-          gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' >> "$GITHUB_ENV"
-          echo 'EOF' >> $GITHUB_ENV
+          echo 'track-repos<<EOF' >> "${GITHUB_ENV}"
+          gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' >> "${GITHUB_ENV}"
+          echo 'EOF' >> "${GITHUB_ENV}"
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -52,20 +52,20 @@ jobs:
       #   env:
       #     GH_TOKEN: ${{ github.token }}
 
-  # backup-track-repos:
-  #   needs: [fetch-repos]
-  #   name: Backup ${{ matrix.repo }}
+  backup-track-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
 
-  #   strategy:
-  #     fail-fast: false
-  #     max-parallel: 1
-  #     matrix:
-  #       repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
 
-  #   uses: exercism/backup/.github/workflows/backup.yml@main
-  #   secrets: inherit
-  #   with:
-  #     repo: ${{ matrix.repo }}
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    secrets: inherit
+    with:
+      repo: ${{ matrix.repo }}
 
   # backup-tooling-repos:
   #   needs: [fetch-repos]
