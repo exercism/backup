@@ -62,7 +62,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
-          repository: ${{ matrix.repo }}
+          repository: ${{ github.repository_owner }}/${{ matrix.repo }}
           fetch-depth: 0 # Fetch the entire history to backup everyting
 
       - name: Setup SSH for AWS CodeCommit
