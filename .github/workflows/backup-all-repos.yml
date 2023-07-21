@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      repos: ${{ steps.fetch-repos.outputs.result }}
+      track-repos: ${{ steps.fetch-repos.outputs.result.track }}
 
     steps:
       - name: Fetch the repos to backup
@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track ) }}
+        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos ) }}
 
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
