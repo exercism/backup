@@ -74,5 +74,8 @@ jobs:
 
       - name: Push repo to AWS CodeCommit
         run: |
-          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ github.event.repository.name }}"
-          git push --tags --prune aws-codecommit "refs/remotes/origin/*:refs/heads/*"
+          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ matrix.repo }}"
+          git remote prune aws-codecommit
+          git push main aws-codecommit
+          git branch -D main
+          git push --tags --all --force aws-codecommit
