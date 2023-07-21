@@ -80,5 +80,6 @@ jobs:
           git push aws-codecommit main
           git checkout $(git log --branches -1 --pretty=format:"%H")
           git branch -D main
+          git branch
           git push --all --force aws-codecommit
           git push --tags --force aws-codecommit
