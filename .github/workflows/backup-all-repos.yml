@@ -17,8 +17,8 @@ jobs:
 
     outputs:
       track-repos: ${{ steps.fetch-repos.outputs.track-repos }}
-      # tooling-repos: ${{ steps.fetch-repos.outputs.tooling-repos }}
-      # other-repos: ${{ steps.fetch-repos.outputs.other-repos }}
+      tooling-repos: ${{ steps.fetch-repos.outputs.tooling-repos }}
+      other-repos: ${{ steps.fetch-repos.outputs.other-repos }}
 
     steps:
       - name: Fetch the repos
