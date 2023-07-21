@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   backup-repo:
-    name: Backup ${{ inputs.repo }}
+    name: ${{ inputs.repo }}
     runs-on: ubuntu-22.04
 
     steps:
