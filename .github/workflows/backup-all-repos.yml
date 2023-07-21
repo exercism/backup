@@ -52,6 +52,6 @@ jobs:
 
     runs-on: ubuntu-22.04
     steps:
-      - name: Test
-        run: |
-          echo ${{ needs.fetch-repos.outputs }}
+      - env:
+          OUTPUT: ${{needs.fetch-repos.outputs}}
+        run: echo $OUTPUT
