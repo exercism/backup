@@ -17,84 +17,82 @@ jobs:
 
     outputs:
       track-repos: ${{ steps.fetch-track-repos.outputs.track-repos }}
-      tooling-repos: ${{ steps.fetch-tooling-repos.outputs.tooling-repos }}
-      other-repos: ${{ steps.fetch-other-repos.outputs.other-repos }}
+      # tooling-repos: ${{ steps.fetch-tooling-repos.outputs.tooling-repos }}
+      # other-repos: ${{ steps.fetch-other-repos.outputs.other-repos }}
 
     steps:
       - name: Fetch the track repos
         id: fetch-track-repos
         run: |
-          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]')
-
-          echo 'TRACK_REPOS<<TRACK_REPOS_EOF' >> $GITHUB_ENV
-          echo "track-repos=${track_repos}" >> "$GITHUB_OUTPUT"
-          echo 'TRACK_REPOS_EOF' >> $GITHUB_ENV
+          echo 'track-repos<<EOF' >> $GITHUB_ENV
+          gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Fetch the tooling repos
-        id: fetch-tooling-repos
-        run: |
-          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
+      # - name: Fetch the tooling repos
+      #   id: fetch-tooling-repos
+      #   run: |
+      #     tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'TOOLING_REPOS<<TOOLING_REPOS_EOF' >> $GITHUB_ENV
-          echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
-          echo 'TOOLING_REPOS_EOF' >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ github.token }}
+      #     echo 'TOOLING_REPOS<<TOOLING_REPOS_EOF' >> $GITHUB_ENV
+      #     echo "tooling-repos=${tooling_repos}" >> "$GITHUB_OUTPUT"
+      #     echo 'TOOLING_REPOS_EOF' >> $GITHUB_ENV
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-      - name: Fetch the other repos
-        id: fetch-other-repos
-        run: |
-          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
+      # - name: Fetch the other repos
+      #   id: fetch-other-repos
+      #   run: |
+      #     other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]')
 
-          echo 'OTHER_REPOS<<OTHER_REPOS_EOF' >> $GITHUB_ENV
-          echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
-          echo 'OTHER_REPOS_EOF' >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ github.token }}
+      #     echo 'OTHER_REPOS<<OTHER_REPOS_EOF' >> $GITHUB_ENV
+      #     echo "other-repos=${other_repos}" >> "$GITHUB_OUTPUT"
+      #     echo 'OTHER_REPOS_EOF' >> $GITHUB_ENV
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-  backup-track-repos:
-    needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+  # backup-track-repos:
+  #   needs: [fetch-repos]
+  #   name: Backup ${{ matrix.repo }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.track-repos) }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
 
-  backup-tooling-repos:
-    needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+  # backup-tooling-repos:
+  #   needs: [fetch-repos]
+  #   name: Backup ${{ matrix.repo }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.tooling-repos) }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
 
-  backup-other-repos:
-    needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+  # backup-other-repos:
+  #   needs: [fetch-repos]
+  #   name: Backup ${{ matrix.repo }}
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
+  #   strategy:
+  #     fail-fast: false
+  #     max-parallel: 1
+  #     matrix:
+  #       repo: ${{ fromJson(needs.fetch-repos.outputs.other-repos) }}
 
-    uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
-    with:
-      repo: ${{ matrix.repo }}
+  #   uses: exercism/backup/.github/workflows/backup.yml@main
+  #   secrets: inherit
+  #   with:
+  #     repo: ${{ matrix.repo }}
