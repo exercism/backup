@@ -53,5 +53,5 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - env:
-          OUTPUT: ${{needs.fetch-repos.outputs}}
+          OUTPUT: ${{ needs.fetch-repos.outputs.track-repos }}
         run: echo $OUTPUT
