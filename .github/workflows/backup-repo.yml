@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       repos:
-        description: List of repos to backup, formatted as a JSON array, e.g. ["exercism/csharp-test-runner"]
+        description: List of repos to backup, formatted as a JSON array, e.g. ["exercism/configlet"]
         required: true
         default: ""
   schedule:
