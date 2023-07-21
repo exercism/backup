@@ -33,6 +33,8 @@ jobs:
           for repo in $missing_codecommit_repos; do
             echo aws codecommit create-repository --repository-name $repo
           done
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   fetch-github-repos:
     name: Fetch GitHub repos
