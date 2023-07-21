@@ -47,7 +47,7 @@ jobs:
 
   backup-track-repos:
     needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+    name: Backup
 
     strategy:
       fail-fast: false
@@ -62,7 +62,7 @@ jobs:
 
   backup-tooling-repos:
     needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+    name: Backup
 
     strategy:
       fail-fast: false
@@ -77,7 +77,7 @@ jobs:
 
   backup-other-repos:
     needs: [fetch-repos]
-    name: Backup ${{ matrix.repo }}
+    name: Backup
 
     strategy:
       fail-fast: false
