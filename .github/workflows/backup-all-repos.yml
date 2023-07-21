@@ -1,0 +1,60 @@
+name: Backup all repos
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: 0 0 * * * # Daily
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-repos:
+    name: Fetch repos
+    runs-on: ubuntu-22.04
+
+    outputs:
+      repos: ${{ steps.fetch-repos.outputs.result }}
+
+    steps:
+      - name: Fetch the repos to backup
+        id: fetch-repos
+        uses: actions/github-script@d556feaca394842dc55e4734bf3bb9f685482fa0
+        with:
+          script: |
+            const allRepos = (await github.paginate(github.rest.search.repos, {
+              q: 'org:exercism+is:public+archived:false'
+            })).flatMap(({ full_name }) => [full_name])
+
+            const toolingRepos = (await github.paginate(github.rest.search.repos, {
+              q: 'org:exercism+topic:exercism-tooling+is:public+archived:false'
+            })).flatMap(({ full_name }) => [full_name])
+
+            const trackRepos = (await github.paginate(github.rest.search.repos, {
+              q: 'org:exercism+topic:exercism-track+is:public+archived:false'
+            })).flatMap(({ full_name }) => [full_name])
+
+            const restRepos = allRepos.filter(r => !toolingRepos.includes(r) && !trackRepos.includes(r))
+
+            return { trackRepos, toolingRepos, restRepos }
+
+  backup-repos:
+    needs: [fetch-repos]
+    name: Backup ${{ matrix.repo }}
+
+    # Launch one job per track repo.
+    # This is probably less efficient than running everything in one job
+    # and manually cloning and checking out the repos. However, launching a job
+    # lets us use actions like actions/checkout.
+    # It also gives us a pretty job overview that makes it easy to spot issues with
+    # particular tracks.
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.fetch-repos.outputs.repos.track) }}
+
+    uses: exercism/backup/.github/workflows/backup.yml@main
+    with:
+      repo: ${{ matrix.repo }}
