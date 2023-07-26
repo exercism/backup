@@ -2,6 +2,11 @@ name: Backup repo
 on:
   repository_dispatch:
     types: [backup_repo]
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: The name of the repo to backup (e.g. 'configlet')
+        required: false
 
 permissions:
   contents: read
@@ -12,4 +17,4 @@ jobs:
     uses: exercism/backup/.github/workflows/backup.yml@main
     secrets: inherit
     with:
-      repo: ${{ github.event.client_payload.repo }}
+      repo: ${{ github.event.inputs && github.event.inputs.repo || github.event.client_payload.repo }}
