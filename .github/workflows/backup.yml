@@ -32,7 +32,14 @@ jobs:
 
       - name: Push repo to AWS CodeCommit
         run: |
-          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}"
+          git config lfs.ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}.git/info/lfs.locksverify false
+          git config lfs.ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}/info/lfs.locksverify false
+          git config lfs.ssh://git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}.git/info/lfs.locksverify false
+          git config lfs.https://git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}.git/info/lfs.locksverify false
+          git config lfs.ssh://git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}/info/lfs.locksverify false
+          git config lfs.https://git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}/info/lfs.locksverify false
+          git remote add aws-codecommit "ssh://${{ secrets.AWS_CODECOMMIT_SSH_PRIVATE_KEY_ID }}@git-codecommit.${{ secrets.AWS_REGION }}.amazonaws.com/v1/repos/${{ inputs.repo }}"          
+
           git push aws-codecommit main
           git checkout $(git log --branches -1 --pretty=format:"%H")
           git branch -D main
