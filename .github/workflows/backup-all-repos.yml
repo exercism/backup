@@ -31,7 +31,7 @@ jobs:
           missing_codecommit_repos=$(comm -23 <(echo "${github_repos}" | sort) <(echo "${codecommit_repos}" | sort))
 
           for repo in $missing_codecommit_repos; do
-            echo aws codecommit create-repository --repository-name $repo
+            aws codecommit create-repository --repository-name $repo
           done
         env:
           GH_TOKEN: ${{ github.token }}
