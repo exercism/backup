@@ -1,0 +1,15 @@
+name: Keep alive
+
+on:
+  schedule:
+    - cron: 0 0 1 * * # Once every month
+  workflow_dispatch:
+
+jobs:
+  keep_alive:
+    if: github.repository_owner == 'exercism' # Stops this job from running on forks
+    uses: exercism/github-actions/.github/workflows/keep-alive.yml@main
+    with:
+      repository: ${{ github.event.repository.name }}
+    secrets:
+      pat_empty_commits: ${{ secrets.PAT_EMPTY_COMMITS }}
