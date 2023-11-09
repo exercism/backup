@@ -12,9 +12,30 @@ permissions:
   contents: read
 
 jobs:
+  validate-repo:
+    name: Validate repo
+    runs-on: ubuntu-22.04
+
+    outputs:
+      is-public: ${{ steps.verify-repo-is-public.outputs.is-public }}
+
+    steps:
+      - name: Verify repo is public
+        id: verify-repo-is-public
+        run: |
+          set +e
+          is_public=$(gh api "repos/exercism/${REPO}" --jq '.private == false' || 'false')
+          set -e
+          echo "is-public=${is_public}" >> "${GITHUB_OUTPUT}"
+        env:
+          REPO: ${{ github.event.inputs && github.event.inputs.repo || github.event.client_payload.repo }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   backup-repo:
     name: Backup repo
+    needs: [validate-repo]
+    if: needs.validate-repo.outputs.is-public == 'true'
     uses: exercism/backup/.github/workflows/backup.yml@main
-    secrets: inherit
     with:
       repo: ${{ github.event.inputs && github.event.inputs.repo || github.event.client_payload.repo }}
+    secrets: inherit
