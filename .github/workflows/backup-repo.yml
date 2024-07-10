@@ -29,7 +29,7 @@ jobs:
           echo "is-public=${is_public}" >> "${GITHUB_OUTPUT}"
         env:
           REPO: ${{ github.event.inputs && github.event.inputs.repo || github.event.client_payload.repo }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   backup-repo:
     name: Backup repo

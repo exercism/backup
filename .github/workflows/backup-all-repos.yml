@@ -34,7 +34,7 @@ jobs:
             aws codecommit create-repository --repository-name $repo
           done
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   fetch-github-repos:
     name: Fetch GitHub repos
@@ -52,7 +52,7 @@ jobs:
           track_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' | tr -d '\n')
           echo "track-repos=${track_repos}" >> "${GITHUB_OUTPUT}"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch tooling repos
         id: fetch-tooling-repos
@@ -60,7 +60,7 @@ jobs:
           tooling_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
           echo "tooling-repos=${tooling_repos}" >> "${GITHUB_OUTPUT}"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch other repos
         id: fetch-other-repos
@@ -68,7 +68,7 @@ jobs:
           other_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
           echo "other-repos=${other_repos}" >> "${GITHUB_OUTPUT}"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   backup-track-repos:
     name: Backup
