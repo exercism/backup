@@ -26,7 +26,7 @@ jobs:
 
       - name: Create repos
         run: |
-          github_repos=$(gh api -X GET search/repositories --paginate -f q='org:exercism is:public archived:false' --jq '.items[].name')
+          github_repos=$(gh api -X GET search/repositories --paginate -f per_page=100 -f q='org:exercism is:public archived:false' --jq '.items[].name')
           codecommit_repos=$(aws codecommit list-repositories | jq -r '.repositories[] | .repositoryName')
           missing_codecommit_repos=$(comm -23 <(echo "${github_repos}" | sort) <(echo "${codecommit_repos}" | sort))
 
@@ -49,7 +49,7 @@ jobs:
       - name: Fetch track repos
         id: fetch-track-repos
         run: |
-          track_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' | tr -d '\n')
+          track_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false topic:exercism-track' --jq '[.items[] | .name]' | tr -d '\n')
           echo "track-repos=${track_repos}" >> "${GITHUB_OUTPUT}"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,7 +57,7 @@ jobs:
       - name: Fetch tooling repos
         id: fetch-tooling-repos
         run: |
-          tooling_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          tooling_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
           echo "tooling-repos=${tooling_repos}" >> "${GITHUB_OUTPUT}"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -65,7 +65,7 @@ jobs:
       - name: Fetch other repos
         id: fetch-other-repos
         run: |
-          other_repos=$(gh api -X GET --paginate search/repositories -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
+          other_repos=$(gh api -X GET --paginate search/repositories -f per_page=100 -f q='org:exercism is:public archived:false -topic:exercism-track -topic:exercism-tooling' --jq '[.items[] | .name]' | tr -d '\n')
           echo "other-repos=${other_repos}" >> "${GITHUB_OUTPUT}"
         env:
           GH_TOKEN: ${{ github.token }}
