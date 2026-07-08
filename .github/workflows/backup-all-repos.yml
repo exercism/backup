@@ -14,7 +14,7 @@ permissions:
 jobs:
   create-codecommit-repos:
     name: Create CodeCommit repos
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Configure AWS Credentials
@@ -39,7 +39,7 @@ jobs:
 
   fetch-github-repos:
     name: Fetch GitHub repos
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
 
     outputs:
       track-repos: ${{ steps.fetch-track-repos.outputs.track-repos }}
